@@ -238,7 +238,6 @@ static void* worker()
          //scrivo sul log file
          LOG("Richiesta servita dal thread",0);
          LOG("TH ",thread);
-         ciao
          switch (r->OP)
          {
          case OPEN:      
