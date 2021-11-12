@@ -1,11 +1,11 @@
 #!/bin/bash
-valgrind --leak-check=full --show-leak-kinds=all ./out/server configurazioni/config1.txt
+sudo  ./../out/server ../configurazioni/config1.txt
 pid=$!
 sleep 2s
-sudo  ./out/client -p -f /mysock -W /home/francesco/Projects/ciao.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao2.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao3.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao5.txt -w /home/francesco/Progetto_SistemiOperativi2021/TestSet/dentro
-sudo  ./out/client -p -f /mysock -r /home/francesco/Projects/ciao2.txt,/home/francesco/Projects/ciao.txt 
-sudo ./out/client -p -f /mysock -R d  /home/francesco/Progetto_SistemiOperativi2021/download
-sudo ./out/client -h
+sudo  ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -W /home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao2.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao3.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao5.txt -w /home/francesco/Progetto_SistemiOperativi2021/TestSet/dentro
+sudo  ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -r /home/francesco/Projects/ciao2.txt,/home/francesco/Projects/ciao.txt 
+sudo ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -R d  /home/francesco/Progetto_SistemiOperativi2021/download
+sudo ./home/francesco/Progetto_SistemiOperativi2021/out/client -h
 
 sleep 1s
 kill -s SIGHUP $pid
