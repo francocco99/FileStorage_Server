@@ -20,7 +20,7 @@ if [ -d "log" ]; then
    close=$(grep -o "CL" "$file" | wc -l)
    lock=$(grep -o "LCK" "$file" | wc -l)
    unlock=$(grep -o "ULK" "$file" | wc -l)
-   algrim=$(grep AR "$file" | wc -l)
+   algrim=$(grep -o "AR" "$file" | wc -l)
    maxfile=$(grep NF "$file" | cut -c 6-| sort -n | tail -1)
    maxbyte=$(grep NB "$file" | cut -c 6-| sort -n | tail -1)
    maxcon=$(grep  NC "$file" | cut -c 6-| sort -n | tail -1)
