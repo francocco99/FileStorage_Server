@@ -286,7 +286,7 @@ static void* worker()
             if(r->flags==O_LOCK)
             {
                if(contain(Hash,r->pathname))
-               {// apro il file in modaltà locked
+               {// apro il file in modaltà lockedF
                   LOCK(&mtxhash);
                      File* f=getvalue(Hash,r->pathname);
                      LockFile(&f);
@@ -619,8 +619,8 @@ void configura()
          sc.filelog=malloc(sizeof(char)*strlen(valore)+1);
          strcpy(sc.filelog, valore);
          printf("%s",sc.filelog);
-
-         if((logfd=fopen("/home/francesco/Progetto_SistemiOperativi2.0/log/log.txt","w" ))==NULL)//apro il file di log
+         sc.filelog[strlen(sc.filelog)-1]='/0';
+         if((logfd=fopen(sc.filelog,"w" ))==NULL)//apro il file di log
          {
             perror("s.c file log, in apertura");
                exit(EXIT_FAILURE);
@@ -802,11 +802,12 @@ void Handlercapacity(int fd)
          ft= takeHead(fifo);
       UNLOCK(&mtxfifo);
       f=ft->cont;
-      LOCK(&mtxhash);
+       LOCK(&mtxhash);
          actual_size=actual_size-f->dim;
-         h_delete(&Hash,f->path_name);
-      UNLOCK(&mtxhash);
+       UNLOCK(&mtxhash);
       insertT(ftosend,ft->cont,ft->key); // inserisco nella coda dei file da spedire
+      free(ft->key);
+      free(ft);      
       number++;
    }
       
@@ -827,7 +828,15 @@ void Handlercapacity(int fd)
       //contenuto
       writen(fd,f->cont,f->dim);
       LOG("RD",f->dim);
+      LOCK(&mtxhash);
+         h_delete(&Hash,f->path_name);
+       UNLOCK(&mtxhash);
+      free(temp->key);
+      free(temp);
    }
+   // svuoto la lista appena creata
+   free(ftosend);
+   
 }
 void readFiles(int fd,int n)
 {
@@ -989,8 +998,7 @@ void freeStruct()
    while(cur!=NULL)
    {
       node * tmp=cur;
-      cur=cur->next;
-      File* f=tmp->cont;        
+      cur=cur->next;     
       free(tmp->key);
       free(tmp);
       
