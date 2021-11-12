@@ -1,4 +1,4 @@
 #!/bin/bash
-valgrind --leak-check=full --show-leak-kinds=all ./server
+valgrind --leak-check=full --show-leak-kinds=all ./out/server configurazioni/config3.txt
 sleep 2s
 ./client -f /mysock -W  -w TestDir/1.0/  -p
