@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../header/list.h"
+#include "../header/file.h"
 #define DIMK 50
 
 Lis create()
@@ -91,6 +92,7 @@ node* delete(list *l, char* k)
 {
    node *tmp;
    tmp=l->header;
+   File* f;
    if(strcmp(l->header->key,k)==0)
    {
       l->header=l->header->next;
@@ -99,6 +101,10 @@ node* delete(list *l, char* k)
          l->header->prev=NULL;
       }
       l->length--;
+      f=tmp->cont;
+      free(f->cont);
+      free(f);
+      free(tmp->key);
       free(tmp);
       return tmp;
    }
@@ -107,12 +113,15 @@ node* delete(list *l, char* k)
    {   
        if (strcmp(tmp->key,k)==0)
         {
-          
+            node* tofree=tmp;
             tmp->prev->next = tmp->next;
             if(tmp->next !=NULL)
                tmp->next->prev=tmp->prev;
-            
-            free(tmp);
+            f=tofree->cont;
+            free(f->cont);
+            free(f);
+            free(tofree->key);
+            free(tofree);
             l->length--;
             return tmp;
         }
@@ -163,11 +172,12 @@ node* takeHead(list *l)
       l->header=NULL;
       l->tailer=NULL;
    }
-  
+   
    //c'è da fare la free
    return tmp;
 
 }
+
 int isEmpty(Lis l)
 {
    if(l->length==0)return 1;
