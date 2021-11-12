@@ -23,7 +23,7 @@
 static void* worker();
 static void* dispatcher();
 void LOG_file(char* log);
-void configura();
+void configura(char* nomefile);
 request * readMessage(int client);   /// metodo per la lettura dei messaggi
 void sendMessage(int client, int message); // metodo per la scrittura di messagi sulla socket
 void sendFile(int client,char* cont,int dim); // per mandare i messaggi
@@ -86,11 +86,11 @@ int actual_size=0;
 pthread_t disp;
 pthread_t Hand;
 pthread_t* threadp;
-int main(void)
+int main(int argc,char* argv[])
 {
    
   // queueric=Queue_create();
-   configura();
+   configura(argv[1]);
    Hash=h_create(sc.space); //creazione tabella hash
    fifo=create();
    queueric=create();
@@ -577,8 +577,9 @@ static void* worker()
    return NULL;
 }
 // ottiene la configurazione del file REMINDER: sarebbe opportuno passarlo con argv[0] il file config
-void configura()
+void configura(char * nomefile)
 {
+   printf("%s\n",nomefile);
    FILE* fdc;
    char* line1;
    char* valore;
@@ -586,7 +587,7 @@ void configura()
    char temp[N];
    char* buff=malloc(sizeof(char)*N);
    //char* line;
-   if((fdc=fopen("config.txt","r"))==NULL)
+   if((fdc=fopen(nomefile,"r"))==NULL)
    {
       perror("config.txt, in apertura");
       exit(EXIT_FAILURE);
