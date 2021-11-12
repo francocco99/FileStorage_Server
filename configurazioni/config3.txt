@@ -1,0 +1,5 @@
+THREADS:8
+SIZE:32000000
+NFILE:100
+NAME:/mysock
+LOGFILE:/home/francesco/Projects/log
