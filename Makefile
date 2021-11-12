@@ -15,12 +15,12 @@ client:
 
 all: server client
 
-test1:
-
-test2:
-
-test3:
-
+test1: server client
+	./Test/test1.sh
+test2:  server client
+	./Test/test2.sh
+test3: server client
+	./Test/test3.sh
 clean:
 
 cleanall:
