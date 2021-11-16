@@ -1,11 +1,10 @@
 #!/bin/bash
-sudo  ./../out/server ../configurazioni/config1.txt
+sudo  ./out/server configurazioni/config1.txt &
 pid=$!
 sleep 2s
-sudo  ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -W /home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao2.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao3.txt,/home/francesco/Progetto_SistemiOperativi2021/TestSet/ciao5.txt -w /home/francesco/Progetto_SistemiOperativi2021/TestSet/dentro
-sudo  ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -r /home/francesco/Projects/ciao2.txt,/home/francesco/Projects/ciao.txt 
-sudo ./home/francesco/Progetto_SistemiOperativi2021/out/client -p -f /mysock -R d  /home/francesco/Progetto_SistemiOperativi2021/download
-sudo ./home/francesco/Progetto_SistemiOperativi2021/out/client -h
+sudo  ./out/client -p -f /mysock -W TestSet/test1.txt,TestSet/test2.txt,TestSet/test3.txt,TestSet/test4.txt 
+sudo  ./out/client -p -f /mysock -r TestSet/test1.txt,TestSet/test2.txt 
+sudo valgrind --track-origins=yes ./out/client -p -f /mysock  -R n=3 -d download 
 
 sleep 1s
 kill -s SIGHUP $pid
