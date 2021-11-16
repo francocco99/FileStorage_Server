@@ -244,8 +244,9 @@ int readNFiles(int n, const char* dirname)
    r.OP=READN;
    r.flags=n;
    r.size=0;
+   r.fd=0;
    strcpy(r.pathname,"readN");
-   write(fd_skt,&r,sizeof(r));
+   writen(fd_skt,&r,sizeof(r));
    read(fd_skt,&result,sizeof(int));
    switch (result)
    {
@@ -706,24 +707,26 @@ static inline int writen(long fd, void *buf, size_t size) {
 
 void  letturafile(char* dirname)
 {
+
    errno=0;
    int dim;
    char* namefile;
    readn(fd_skt,&dim,sizeof(int));
-   printf("HO LETTO LA DIMENSIONE DEL FILE %d\n",dim);
+   //printf("HO LETTO LA DIMENSIONE DEL FILE %d\n",dim);
    int len;
    readn(fd_skt,&len,sizeof(int));
-   printf("LUNGHEZZA DEL PATHNAME %d\n",len);
+  // printf("LUNGHEZZA DEL PATHNAME %d\n",len);
+    namefile=malloc(sizeof(char)*len+1);
    readn(fd_skt,namefile,len);
-   namefile[len]='\0';
-   printf("HO LETTO IL NOME DEL FILE:%s\n",namefile);
+  
+   //printf("HO LETTO IL NOME DEL FILE:%s\n",namefile);
    void* cont=malloc(dim);
    readn(fd_skt,cont,dim);
-   printf("HO LETTO IL CONTENUTO:%s",cont);
+   //printf("HO LETTO IL CONTENUTO:%s",cont);
    if(dirname!=NULL)
    {
       struct stat statbuf;
-      printf("CARTELLA DOVE VADO A SCRIVERE IL FILE%s\n",dirname);
+     // printf("CARTELLA DOVE VADO A SCRIVERE IL FILE %s\n",dirname);
       if(stat(dirname, &statbuf)==-1) 
       {
          perror("eseguendo la stat");
@@ -732,11 +735,13 @@ void  letturafile(char* dirname)
       }
       if(S_ISDIR(statbuf.st_mode)) 
       {      
+
+        char* newdir=strc(dirname,"/");
          FILE* filed;
          char *filename;
-         char** temp;    
+         char** temp; 
          int result=parse_str(&temp,namefile,"/");
-         filename=strc(dirname,temp[result-1]);
+         filename=strc(newdir,temp[result-1]);
          if((filed=fopen(filename,"wb"))==NULL)
          {
             perror("file.txt, in apertura");
