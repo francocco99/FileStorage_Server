@@ -620,7 +620,7 @@ void configura(char * nomefile)
          sc.filelog=malloc(sizeof(char)*strlen(valore)+1);
          strcpy(sc.filelog, valore);
          printf("%s",sc.filelog);
-         sc.filelog[strlen(sc.filelog)-1]='/0';
+         sc.filelog[strlen(sc.filelog)-1]='\0';
          if((logfd=fopen(sc.filelog,"w" ))==NULL)//apro il file di log
          {
             perror("s.c file log, in apertura");
@@ -873,7 +873,7 @@ void readFiles(int fd,int n)
                      //dimensione
                      writen(fd,&f->dim,sizeof(int));
                      ///forse scrivere la dimenisone del nome file
-                     int len=strlen(f->path_name)+1;
+                     int len=strlen(f->path_name);
                      writen(fd,&len,sizeof(int));
                      //nomefile
                      writen(fd,f->path_name,len);

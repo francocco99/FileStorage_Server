@@ -33,7 +33,7 @@ void append(char* namefile,char* contentfile);
 
 char operation[N];
 char backupFolder[N];
-char downloadFolder[N];
+char* downloadFolder;
 char prova[100];
 int result=0;
 //FLAG PER IL CONTROLLO DEGLI ARGOMENTI
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
    char* buf=malloc(sizeof(char)*N);
    char* namesock=malloc(sizeof(char)*N);
 
-  // controlFirstStr(argv,argc);
+    controlFirstStr(argv,argc);
    
  
    //inserire i controlli per la gestione dei comandi
@@ -440,6 +440,7 @@ void controlFirstStr(char** argv,int argc)
       else if(strcmp(argv[i],"-d")==0)
       {
          d=1;      
+         downloadFolder=malloc(sizeof(char)*strlen(argv[i+1])+1);
          strcpy(downloadFolder,argv[i+1]);
         
       }
