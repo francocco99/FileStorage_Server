@@ -15,9 +15,10 @@ int parse_str(char*** ris,char* ric, const char* delim)
       char *token = strtok_r(ric, delim, &tmpstr);
       while (token) 
       {
-         (*ris)[i]=malloc(sizeof(char)*strlen(token));
+         (*ris)[i]=malloc(sizeof(char)*(strlen(token)+1));
     
          strcpy((*ris)[i],token);
+        // printf("%s\n",(*ris[i]));
          i++;
          if(i==N){
             realloc(*ris,(2*N)*sizeof(char*)); printf("QUA CI ENTRO\n");
@@ -54,7 +55,7 @@ char * concat(char* str, ...)
 }
 /*int main(int argc, char *argv[])
 {
-  /* int n=0;
+  int n=0;
    char** k=NULL;
    char ric[30];
    scanf("%s",ric);
@@ -69,4 +70,11 @@ char * concat(char* str, ...)
    char  prova[1000];
    strcpy(prova,concat("ciao",":","fallito","chedici", "coglione",NULL));
    printf("%s\n",prova);
+    int n=0;
+   char** k=NULL;
+   char ric[30];
+   scanf("%s",ric);
+   n=parse_str(&k,ric,"/");
+   printf("%s\n",k[n-1]);
+
 }*/
