@@ -1,5 +1,5 @@
 THREADS:3
-SIZE:200
+SIZE:40
 NFILE:50
 NAME:/mysock
-LOGFILE:/home/francesco/Projects/log
+LOGFILE:/home/francesco/Progetto_SistemiOperativi2021/log/log.txt
