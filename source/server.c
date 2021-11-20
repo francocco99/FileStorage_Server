@@ -58,6 +58,10 @@ pthread_cond_t condlog=PTHREAD_COND_INITIALIZER;
 
 pthread_mutex_t mtxfifo= PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t condfifo= PTHREAD_COND_INITIALIZER;
+
+pthread_mutex_t mtxcon= PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condcon=PTHREAD_COND_INITIALIZER;
+
 int pipefd[2];
 ServerConf sc;
 //Queue* queueric;
@@ -69,7 +73,6 @@ int gestore=1;
 int closesighup=1;
 
 int threadid=0;
-
 int fd; //indice per utilizzare 
 int fdc, 
    fd_skt; // scoket di connessione
@@ -162,7 +165,6 @@ static void* dispatcher()
                {
                   fd_c=accept(fd_skt,NULL,0); // questa accept non si blocca 
                   activecon++;
-                  printf("HO ACCETTATO UNA RICHIESTA: %d\n",fd_c);
                   LOG("Numero di connessioni attive ",0);
                   LOG("NC: ",activecon);
                   FD_SET(fd_c,&set);
@@ -219,22 +221,17 @@ static void* worker()
    while(terminate)
    {
       LOCK(&mtxrequest);
-      while(/*Queue_isempty(queueric)*/ isEmpty(queueric) && terminate)
+      while( isEmpty(queueric) && terminate)
       {
          WAIT(&condrequest,&mtxrequest); 
       }
       printf("%d\n",terminate);
       if(terminate!=0)
       {
-        /* request* r=Queue_dequeue(queueric);*/
          tofree=takeHead(queueric);
          r=tofree->cont;
          UNLOCK(&mtxrequest);
          // prendo dalla testa della lista
-         
-         printf("NOMEFILE:%s \n",r->pathname);
-         printf("OPERAZIONE:%d\n",r->OP);
-         printf("FLAGS:%d\n\n\n",r->flags);
          //scrivo sul log file
          LOG("Richiesta servita dal thread",0);
          LOG("TH ",thread);
@@ -299,13 +296,14 @@ static void* worker()
                }
             }
             //caso dei flag in or manca
-            if(r->flags==0) // non viene specificato alcun flag
+            if(r->flags==O_LOCK || O_CREATE)
+            if(r->flags==0) // non viene specificato alcun flag apre il file
             {
                if(contain(Hash,r->pathname))
                {
                   LOCK(&mtxhash);
-                  File* f=getvalue(Hash,r->pathname);
-                  f->isopen=1;
+                     File* f=getvalue(Hash,r->pathname);
+                     OpenFile(&f);
                   UNLOCK(&mtxhash);
                   sendMessage(r->fd,SUCCESS);
                }
@@ -317,21 +315,21 @@ static void* worker()
          break;
 
          case LOCKS:
-                  if(contain(Hash,r->pathname))
+               if(contain(Hash,r->pathname))
+               {
+                  LOCK(&mtxhash);
+                  File* f=getvalue(Hash,r->pathname);
+                  if(f->fd==r->fd)
                   {
-                     LOCK(&mtxhash);
-                     File* f=getvalue(Hash,r->pathname);
-                     if(f->fd==r->fd)
-                     {
-                        LockFile(&f);
-                        sendMessage(r->fd,SUCCESS);
-                        LOG("LCK",0);
-                     }
-                     else
-                     {
-                        sendMessage(r->fd,NOTPERMISSION);
-                     }
-                     UNLOCK(&mtxhash);
+                     LockFile(&f);
+                     sendMessage(r->fd,SUCCESS);
+                     LOG("LCK",0);
+                  }
+                  else
+                  {
+                     sendMessage(r->fd,NOTPERMISSION);
+                  }
+                  UNLOCK(&mtxhash);
                }
                else
                {
@@ -550,6 +548,15 @@ static void* worker()
 
                FD_CLR(r->fd,&set);
                close=1;
+               LOCK(&mtxcon);
+               activecon=activecon-1;
+               if(activecon==0 && closesighup==0)
+               {
+                  SIGNAL(&condcon);
+               }
+               UNLOCK(&mtxcon);
+
+               printf("Connessione chiusa\n");
                //decidere cosa fare
 
          break;
@@ -718,22 +725,38 @@ void* signalHandler()
       
       terminate=0;
       gestore=0;
-     /* fd_num=-1;
-       FD_ZERO(&rdset);
-       FD_ZERO(&set);*/
       pthread_join(disp,NULL); //attendo il dispatcher
       LOCK(&mtxrequest);
          BCAST(&condrequest);
       UNLOCK(&mtxrequest);
-
+      //atendo i worker
       for(int i=0;i<sc.nwork;i++)
       {
          pthread_join(threadp[i],NULL);
         
       }
    } else if (signal == SIGHUP) { 
-      //FAI QUALCOS'altro
-      
+      closesighup=0; //non accetto più connessioni
+      LOCK(&mtxcon);
+      //aspetto che non ci siano più connessioni attive
+      while(activecon!=0)
+      {
+         WAIT(&condcon,&mtxcon); 
+      }
+      UNLOCK(&mtxcon);
+      terminate=0;
+      gestore=0;
+      //devo attenderee la close connection
+       pthread_join(disp,NULL); //attendo il dispatcher
+      LOCK(&mtxrequest);
+         BCAST(&condrequest);
+      UNLOCK(&mtxrequest);
+      //atendo i worker
+      for(int i=0;i<sc.nwork;i++)
+      {
+         pthread_join(threadp[i],NULL);
+        
+      }
    }
    for(int i=0;i<sc.space;i++ )
    {
@@ -795,8 +818,6 @@ void Handlercapacity(int fd)
    int number=0; //numero di file che il server invierà al client
    File* f;
    node* ft;
-   printf("actualsize %d\n",actual_size);
-   printf("space server %d\n",sc.space);
    while(actual_size>sc.space)
    {
       LOCK(&mtxfifo);
@@ -812,7 +833,6 @@ void Handlercapacity(int fd)
       number++;
    }
       
-   printf("NUMERO DI FILE DA INVIARE: %d\n",number);
    //invio numero di file
    writen(fd,&number,sizeof(int));
    for(int i=0;i<number;i++)
@@ -842,54 +862,54 @@ void Handlercapacity(int fd)
 void readFiles(int fd,int n)
 {
    int i=0;
+   int number=0;
    if(n<=0)
    {
       printf("Leggo tutti i File\n");
+      number=Hash->nelem;
    }
    else
    {
       printf("Leggo solo alcuni File\n");
       if(n>Hash->nelem)
       {
-
-         writen(fd,&Hash->nelem,sizeof(int));
+         number=Hash->nelem;
       }
       else
       {
-         printf("number che invio %d\n",n);
-         writen(fd,&n,sizeof(int));
-         while(n>0 && i<Hash->size )
-         {
-            Lis curr=Hash->buckets[i];
-            if(curr!=NULL)
-            {
-               if(curr->length>0)
-               {
-                  node* cur=curr->header;
-                  while(cur!=NULL)
-                  {
-                    // devo inviare il file
-                     File* f=cur->cont;
-                     //dimensione
-                     writen(fd,&f->dim,sizeof(int));
-                     ///forse scrivere la dimenisone del nome file
-                     int len=strlen(f->path_name);
-                     writen(fd,&len,sizeof(int));
-                     //nomefile
-                     writen(fd,f->path_name,len);
-                     //contenuto
-                     writen(fd,f->cont,f->dim);
-                     LOG("RD",f->dim);
-                     n--;
-                     cur=cur->next;
-                  }
-                  printf("\n");
-               }
-            }
-            i++;
-         }
-      } 
+         number=n;
+      }
    }
+   writen(fd,&number,sizeof(int));
+   while(number>0 && i<Hash->size )
+   {
+      Lis curr=Hash->buckets[i];
+      if(curr!=NULL)
+      {
+         if(curr->length>0)
+         {
+            node* cur=curr->header;
+            while(cur!=NULL)
+            {
+               // devo inviare il file
+               File* f=cur->cont;
+               //dimensione
+               writen(fd,&f->dim,sizeof(int));
+               ///forse scrivere la dimenisone del nome file
+               int len=strlen(f->path_name)+1;
+               writen(fd,&len,sizeof(int));
+               //nomefile
+               writen(fd,f->path_name,len);
+               //contenuto
+               writen(fd,f->cont,f->dim);
+               LOG("RD",f->dim);
+               number--;
+               cur=cur->next;
+            }
+         }
+      }
+      i++;
+   } 
 }
 
 
@@ -1005,8 +1025,6 @@ void freeStruct()
       
    }
    free(fifo);
-   /*free(queueric->queue);
-   free(queueric);*/
    free(queueric);
    fclose(logfd);
 }
