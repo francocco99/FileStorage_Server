@@ -1,4 +1,16 @@
 #!/bin/bash
-valgrind --leak-check=full --show-leak-kinds=all ./out/server configurazioni/config2.txt
+ ./out/server configurazioni/config2.txt &
+pid=$!
+socket="socket/mysock"
+Test="TestSet/test2"
 sleep 2s
-./client -f /mysock -W  -w TestDir/1.0/  -p
+
+sleep 2s
+./out/client -p -f $socket -W $Test/test2_1.txt,$Test/test2_2.txt,$Test/test2_3.txt,$Test/test2_4.txt
+./out/client -p -f $socket -w $Test/dentrotest2 -D backup
+./out/client -p -f $socket -r $Test/test2_2.txt,$Test/dentrotest2/test2_6.txt -download
+./out/client -p -f $socket -w TestSet/test3,n=4 
+./out/client -p -f $socket -W $Test/dentrotest2/test2_7.txt
+sleep 1s
+kill -s SIGHUP $pid
+wait $pid

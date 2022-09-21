@@ -3,5 +3,5 @@
 #include <string.h>
 #include <stdarg.h>
 int parse_str(char*** ris,char* ric, const char* delim);
-char * strc(char* s1,char* s2);
+char * strc(const char* s1,char* s2);
 char * concat(char* str, ...);

@@ -1,4 +1,24 @@
 #!/bin/bash
-valgrind --leak-check=full --show-leak-kinds=all ./out/server configurazioni/config3.txt
-sleep 2s
-./client -f /mysock -W  -w TestDir/1.0/  -p
+
+pids=()
+ ./out/server configurazioni/config3.txt & 
+pid_server=$!
+
+# mi salvo i secondi di ora
+current_date=$(date +%s)
+# mi salvo quando dovrò fermare tutto
+stop_date=$(echo "$current_date + 30 "| bc)
+j=0
+while [ $(date +%s) -lt $stop_date ]; do
+        ./Test/scriptclient "-f  socket/mysock -p -W TestSet/test3/test3_5.txt,TestSet/test3/test3_2.txt,TestSet/test3/test3_3.txt,TestSet/test3/test3_4.txt -R n=0  " &
+        pids[j]=$!
+        ((j++))
+         
+done
+
+for((i=0;i<j;++i)); do 
+    wait ${pids[i]}
+done
+
+kill -s SIGINT $pid_server
+wait $pid_server

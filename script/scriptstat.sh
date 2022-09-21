@@ -13,8 +13,7 @@ maxcon=0
 algrim=0
 if [ -d "log" ]; then
    cd log
-   file=$(ls -Ar| head)
-  # logcont=$(cat "${file}")
+   file=$(ls)
    read=$(grep -o "RD" "$file" | wc -l)
    write=$(grep -o "WR" "$file" | wc -l)
    close=$(grep -o "CL" "$file" | wc -l)
@@ -25,7 +24,7 @@ if [ -d "log" ]; then
    maxbyte=$(grep NB "$file" | cut -c 6-| sort -n | tail -1)
    maxcon=$(grep  NC "$file" | cut -c 6-| sort -n | tail -1)
    
-   #SALVO LE STRINGHE CON  LA SOMMA TRA LE SIZE Es:19+26+30 PER PASSARLE A BC
+  
    for k in $(grep "WR" "$file" | cut -c 5-); do
       writebyte=$writebyte+$k
    done  
@@ -41,12 +40,13 @@ if [ -d "log" ]; then
    echo "numero di CLOSE: "$close
    echo "numero di LOCK: "$lock
    echo "numero di UNLOCK: "$unlock
-   echo "--------------------------"
+   
+   echo -e "-------------------------------------------------\\n"
    echo "numero di volte che è stato richiamato l'algoritmo di rimpiazamento" $algrim
    echo "dimensione massima in byte "$maxbyte
    echo "dimensione massima in numero di file "$maxfile
    echo "massimo numero di connessioni contemporaneamente "$maxcon
-   echo "--------------------------"
+   echo  -e "-------------------------------------------------\\n" 
    mediawrbyte=0;
    mediardbyte=0;
    if [ $write -ne 0 ]; then
@@ -63,13 +63,14 @@ if [ -d "log" ]; then
    else
          echo "size media delle letture 0"
    fi
-   echo "--------------------------"
+   echo  -e "-------------------------------------------------\\n" 
    k=$(grep "TH" "$file" | cut -c 6- | sort | tail -1)    
    for ((i=1; i<=$k; i++)); do
       requestserv=$(grep "TH" "$file" | cut -c 6- | grep $i | wc -l)
       echo "worker thread $i richieste servite "$requestserv
    done
-   echo "FILE RIMASTI NEL SERVER"
+   echo  -e "-------------------------------------------------\\n" 
+   echo -e "FILE RIMASTI NEL SERVER \\n"
   for k in $(grep "LF" "$file" | cut -c 4-); do 
       echo $k
   done

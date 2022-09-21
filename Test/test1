@@ -1,11 +1,20 @@
 #!/bin/bash
-sudo  ./out/server configurazioni/config1.txt &
+valgrind --leak-check=full --show-leak-kinds=all ./out/server configurazioni/config1.txt & 
 pid=$!
-sleep 2s
-sudo  ./out/client -p -f /mysock -W TestSet/test1.txt,TestSet/test2.txt,TestSet/test3.txt,TestSet/test4.txt 
-sudo  ./out/client -p -f /mysock -r TestSet/test1.txt,TestSet/test2.txt 
-sudo valgrind --track-origins=yes ./out/client -p -f /mysock  -R n=3 -d download 
 
+socket="socket/mysock"
+Test="TestSet/test1"
+sleep 2s
+./out/client -p -f $socket -h
+./out/client -p -f $socket -W $Test/test1.txt,$Test/test2.txt,$Test/test3.txt,$Test/test4.txt,$Test/test5.txt  -t 200
+./out/client -p -f $socket -w TestSet/test2,n=4 -t 200
+./out/client -p -f $socket -r $Test/test1.txt,$Test/test2.txt  -t 200
+./out/client -p -f $socket  -R n=0 -d download -t 200
+./out/client -p -f $socket -l $Test/test1.txt,$Test/test2.txt -t 200
+./out/client -p -f $socket -c $Test/test1.txt,$Test/test2.txt -t 200
+./out/client -p -f $socket -l $Test/test3.txt,$Test/test4.txt -c $Test/test3.txt,$Test/test4.txt -t 200
+./out/client -p -f $socket -u $Test/test3.txt,$Test/test4.txt -t 200
+./out/client -p -f $socket -a $Test/test5.txt,$Test/test1.txt -t 200 -r $Test/test5.txt -d download 
 sleep 1s
 kill -s SIGHUP $pid
 wait $pid

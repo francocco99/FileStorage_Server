@@ -11,5 +11,3 @@ int unlockFile(const char* pathname);
 int closeFile(const char* pathname);
 int removeFile(const char* pathname);
 void abilitastampe();
-static inline int writen(long fd, void *buf, size_t size);
-static inline int readn(long fd, void *buf, size_t size);

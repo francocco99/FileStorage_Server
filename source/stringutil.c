@@ -3,10 +3,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include "../header/stringutil.h"
-#define N 20
-//funzione che prende una richiesta e fa il parsing in base ad un o specifico carattere
+#define N 30
 
-//PROBLEMA NON FUNZIONA PER >10
+//funzione che prende una richiesta e fa il parsing in base ad un o specifico carattere
 int parse_str(char*** ris,char* ric, const char* delim)
 { 
       *ris=malloc(sizeof(char *)*N);
@@ -18,10 +17,9 @@ int parse_str(char*** ris,char* ric, const char* delim)
          (*ris)[i]=malloc(sizeof(char)*(strlen(token)+1));
     
          strcpy((*ris)[i],token);
-        // printf("%s\n",(*ris[i]));
          i++;
          if(i==N){
-            realloc(*ris,(2*N)*sizeof(char*)); printf("QUA CI ENTRO\n");
+            ris=realloc(*ris,(2*N)*sizeof(char*)); 
             }
          token = strtok_r(NULL, delim, &tmpstr);
       } 
@@ -29,8 +27,9 @@ int parse_str(char*** ris,char* ric, const char* delim)
       return i;
       
 }
+
 // funzione che prende due strinche e le concatena tra loro
-char * strc(char* s1,char* s2)
+char * strc(const char* s1,char* s2)
 {  
    char* concats=malloc(sizeof(char)*(strlen(s1)+strlen(s2)+1));
    strncpy(concats,s1,strlen(s1));
@@ -38,6 +37,7 @@ char * strc(char* s1,char* s2)
    strcat(concats,s2);
    return concats;
 }
+
 // funzione che prende una o più stringhe e le concatena tra loro
 char * concat(char* str, ...)
 {
@@ -53,28 +53,3 @@ char * concat(char* str, ...)
    va_end(ap);  
    return res;
 }
-/*int main(int argc, char *argv[])
-{
-  int n=0;
-   char** k=NULL;
-   char ric[30];
-   scanf("%s",ric);
-   n=parse_str(&k,ric,",");
-   printf("%d\n",n);
-   if(k==NULL){printf("male");return 0;}
-   printf("%s\n",k[1]);
-   for(int i=0;i<n;i++)
-   {
-      printf("%s\n",k[i]);
-   }
-   char  prova[1000];
-   strcpy(prova,concat("ciao",":","fallito","chedici", "coglione",NULL));
-   printf("%s\n",prova);
-    int n=0;
-   char** k=NULL;
-   char ric[30];
-   scanf("%s",ric);
-   n=parse_str(&k,ric,"/");
-   printf("%s\n",k[n-1]);
-
-}*/

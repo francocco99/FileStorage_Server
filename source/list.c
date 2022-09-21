@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../header/list.h"
 #include "../header/file.h"
-#define DIMK 50
+
 
 Lis create()
 {
@@ -17,7 +17,7 @@ Lis create()
 node* createnode(void* value,char* key,node* next, node* prev)
 {
    node* new=malloc(sizeof(node));
-   new->key=malloc(sizeof(char)*DIMK);
+   new->key=malloc(sizeof(char)*strlen(key)+1);
    strcpy(new->key,key);
    new->cont=value;
    new->next=next;
@@ -25,7 +25,7 @@ node* createnode(void* value,char* key,node* next, node* prev)
    return new;
 
 }
-//CONTROLLARE
+
 void insertH(list *l,void *cont,char *k)
 {
    
@@ -41,7 +41,7 @@ void insertH(list *l,void *cont,char *k)
    l->header=new;
    l->length++;
 }
-//CONTROLLARE
+
 void insertT(list *l, void *cont, char* k)
 {
    
@@ -92,7 +92,7 @@ node* delete(list *l, char* k)
 {
    node *tmp;
    tmp=l->header;
-   File* f;
+
    if(strcmp(l->header->key,k)==0)
    {
       l->header=l->header->next;
@@ -101,9 +101,7 @@ node* delete(list *l, char* k)
          l->header->prev=NULL;
       }
       l->length--;
-      f=tmp->cont;
-      free(f->cont);
-      free(f);
+     
       free(tmp->key);
       free(tmp);
       return tmp;
@@ -117,9 +115,7 @@ node* delete(list *l, char* k)
             tmp->prev->next = tmp->next;
             if(tmp->next !=NULL)
                tmp->next->prev=tmp->prev;
-            f=tofree->cont;
-            free(f->cont);
-            free(f);
+         
             free(tofree->key);
             free(tofree);
             l->length--;
@@ -173,7 +169,6 @@ node* takeHead(list *l)
       l->tailer=NULL;
    }
    
-   //c'è da fare la free
    return tmp;
 
 }
@@ -188,7 +183,7 @@ void stampa(Lis l)
    node* temp=l->header;
    while(temp!=NULL)
    {
-      printf("%s->",temp->key);
+      printf("SERVER: %s->",temp->key);
       temp=temp->next;
    }
 }

@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#define MAXS 100
+#define MAXS 130
 #define OPEN   1 
 #define LOCKS   2
 #define UNLOCKS 3
@@ -15,6 +15,7 @@
 #define O_CREATE 11
 #define O_LOCK   12 
 #define O_CRLK   13
+#define O_OPEN 14
 
 #define SUCCESS 100
 #define NOTPRESENT 200
@@ -27,6 +28,9 @@
 #define EMPTY 207
 #define CONNECTION_TIMEOUT 208
 
+int writen(long fd, void *buf, size_t size);
+int readn(long fd, void *buf, size_t size);
+
 typedef struct request
 {
    char pathname[MAXS];
@@ -36,4 +40,3 @@ typedef struct request
    int OP;
    void* contenuto;
 }request;
-
